@@ -1,0 +1,40 @@
+Question 1: By default are django signals executed synchronously or asynchronously? 
+Please support your answer with a code snippet that conclusively proves your stance. 
+The code does not need to be elegant and production ready, we just need to understand your logic.
+
+Ans: By Default django signals are executed synchronously so that once they are executed completely
+the control is transferred back to the calling function.
+
+Here is the code snippet proving this point
+
+---models.py---
+class Todos(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+
+
+@receiver(post_save, sender=Todos)
+def notify_user(sender, instance, **kwargs):
+    # Showing That Django signals are executed synchronously by default
+    print("Todos created successfully")
+
+    time.sleep(3)
+
+    print("Move on to another one")
+
+----------------------------------------
+
+On calling from Views.py the order of execution will be 
+- first statement (print) will execute 
+- wait for 3 seconds
+- third statement (print) will execute
+
+------- OUTPUT ---------
+Todos created successfully
+
+--wait of 3 seconds --
+
+Move on to another one
+
+
+Thus, above code snippet proves that django signals bydefault executes synchronously

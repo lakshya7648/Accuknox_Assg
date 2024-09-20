@@ -1,0 +1,40 @@
+Question 3 : By default do django signals run in the same database transaction as the caller? 
+Please support your answer with a code snippet that conclusively proves your stance. 
+The code does not need to be elegant and production ready, we just need to understand your logic.
+
+Ans : By default, django signals run in the same database transaction as that of the caller.
+
+Here is the proving code snippet
+
+-------- views.py --------------
+def delete_todo(request):
+    title = request.GET['title']
+    with transaction.atomic():
+        print("Caller : Starting transaction")
+        delete_todo = Todos.objects.filter(title = title)
+        delete_todo.delete()
+        print("caller : commiting transaction")
+    
+    return JsonResponse({"message":"Resource deleted"}, status=200)
+--------------------------------
+
+-------- models.py -------------
+@receiver(pre_delete, sender = Todos)
+def warn_user(sender, instance, **kwargs):
+    # Now showing that django signals runs in same database transaction as of caller
+    if connection.in_atomic_block:
+        print("Signal handler : Running with Same Database transaction")
+    else:
+        print("Signal handler : Running in separate database transaction")
+        
+    print("Todo is going to be deleted in your account")
+--------------------------------
+
+-------- Output ----------------
+Caller : Starting transaction
+Signal handler : Running with Same Database transaction
+Todo is going to be deleted from your account
+Signal handler : Running with Same Database transaction
+Todo is going to be deleted from your account
+caller : commiting transaction 
+--------------------------------

@@ -1,0 +1,40 @@
+Question 2 :  Do django signals run in the same thread as the caller? 
+Please support your answer with a code snippet that conclusively proves your stance. 
+The code does not need to be elegant and production ready, we just need to understand your logic.
+
+Ans : Django signals by default runs in the same thread as of the caller. But considering for some complex
+operations can be run on different thread but by default it runs on the same thread.
+
+Here is the proving code snippet:
+----------- views.py ------------
+def create_todos(request):
+    new_todo = Todos.objects.create(
+        title = f"My Todo {random_value}",  # random value is just to differentiate different todos
+        description = "This is a demo todo"
+    )
+    new_todo.save()
+
+    # Showing that django signals bydefault runs as same thread as that of caller
+    print("Current Thread (Caller) : ", threading.currentThread().name)
+
+
+    return JsonResponse({"message":"Resource created"}, status = 200)
+
+--------------------------------
+----------- models.py ----------
+@receiver(post_save, sender=Todos)
+def notify_user(sender, instance, **kwargs):
+
+    # Match with the views
+    print("Current Thread(Signal handler) : ", threading.current_thread().name)
+
+    print("Todos created successfully")
+
+--------------------------------
+
+------- OUTPUT -----------------
+Current Thread(Signal handler) :  Thread-1 (process_request_thread)
+Todos created successfully
+Current Thread (Caller) :  Thread-1 (process_request_thread)
+
+--------------------------------
