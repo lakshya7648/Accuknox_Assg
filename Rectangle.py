@@ -26,6 +26,7 @@ try:
     rect1 = Rectangle(12, 13)
     rect2 = Rectangle(23, 44)
     rect3 = Rectangle('lakshya', 23)
+    rect4 = Rectangle(23, 34)
 except Exception as e:
     print(e)
 
@@ -33,3 +34,4 @@ except Exception as e:
 # iterating over the class instances
 iterateOver(rect1)
 iterateOver(rect2)
+iterateOver(rect4)
